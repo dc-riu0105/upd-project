@@ -1,36 +1,201 @@
 <!DOCTYPE html>
 <html lang="vi">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Profile Website</title>
-  </head>
-  <body>
-    <header>
-      <h1>Chào mừng đến với Website</h1>
-    </header>
-    <nav>
-      <ul>
-        <li><a href="/thongtin.html">Thông tin</a></li>
-        <li><a href="/lienlac.html">Liên lạc</a></li>
-      </ul>
-    </nav>
-    <main>
-      <section id="thongtin">
-        <h2>Thông tin</h2>
-        <h3>Đoàn Thanh Thiên Phúc</h3>
-        <h3>24/08/2019</h3>
-        <h3>Cao 0.9m</h3></section>
-      <section id="lienlac">
-        <h2>Liên lạc</h2>
-        <h3>
-          <a href="https://www.facebook.com/riudz0105/">Click Here👈</a>
-        </h3>
-        <img
-          src="https://scontent.fhan14-2.fna.fbcdn.net/v/t1.6435-9/86287646_189074699029919_8933037126728024064_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=a5f93a&_nc_ohc=tyghsOwyQ6sQ7kNvgFAanxj&_nc_ht=scontent.fhan14-2.fna&oh=00_AYDgOfRqqZvhO3f6sXuf_68Aibcaksevomfqg1vK3bWoCw&oe=66EFBF09"
-          alt="ảnh em bé"
-        />
-    </main>
-    <footer></footer>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Telegram Mini App Shop</title>
+    <!-- Thư viện Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Tailwind CSS để dựng giao diện nhanh -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0b0e14; color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+        .wallet-card { background: linear-gradient(145deg, #161b26, #0f131a); border: 1px solid #222938; }
+        .product-card { background-color: #141821; border: 1px solid #1f2633; }
+    </style>
+</head>
+<body class="pb-20 select-none">
+
+    <!-- Tiêu đề Shop -->
+    <div class="text-center py-4">
+        <h1 class="text-amber-400 font-bold tracking-widest text-sm uppercase">NGHIỆN TRICK SHOP</h1>
+    </div>
+
+    <!-- Khối Ví (Wallet Card) -->
+    <div class="px-4">
+        <div class="wallet-card rounded-2xl p-4 shadow-lg">
+            <div class="flex justify-between items-center mb-3">
+                <span class="text-[11px] font-semibold text-amber-400 tracking-wider uppercase">NGHIỆN TRICK WALLET</span>
+                <span class="text-[10px] text-gray-500 font-semibold tracking-wider">SECURE</span>
+            </div>
+
+            <!-- Thông tin User lấy từ Telegram -->
+            <div class="flex items-center space-x-3 mb-5">
+                <img id="user-avatar" src="https://via.placeholder.com/48" class="w-12 h-12 rounded-xl object-cover border border-gray-700" alt="Avatar">
+                <div>
+                    <h2 id="user-name" class="font-bold text-base text-white">Đang tải...</h2>
+                    <p id="user-info" class="text-xs text-gray-400">@username • ID 00000000</p>
+                </div>
+            </div>
+
+            <!-- Số dư & Nút nạp tiền -->
+            <div class="flex justify-between items-end">
+                <div>
+                    <p class="text-[10px] text-gray-400 uppercase mb-1">SỐ DƯ TÀI KHOẢN</p>
+                    <p id="user-balance" class="text-2xl font-extrabold text-white">0đ</p>
+                </div>
+                <button onclick="openDepositModal()" class="bg-blue-600 hover:bg-blue-500 active:scale-95 transition text-white font-semibold text-xs px-4 py-2.5 rounded-xl">
+                    + Nạp tiền
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Danh sách mặt hàng đang hot -->
+    <div class="px-4 mt-6">
+        <div class="flex justify-between items-center mb-3">
+            <div>
+                <h3 class="font-bold text-base flex items-center gap-1">🔥 Mặt hàng đang hot</h3>
+                <p class="text-xs text-gray-400">Sản phẩm nổi bật đang mở bán</p>
+            </div>
+            <span class="text-[11px] bg-blue-950 text-blue-400 border border-blue-800 px-2.5 py-1 rounded-full">● Cập nhật trực tiếp</span>
+        </div>
+
+        <!-- Lưới sản phẩm -->
+        <div id="product-list" class="grid grid-cols-2 gap-3 mt-3">
+            <!-- Sản phẩm sẽ được render bằng JS từ Backend -->
+        </div>
+    </div>
+
+    <!-- Modal Nạp Tiền (VietQR) -->
+    <div id="deposit-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center p-4 z-50">
+        <div class="bg-[#161b26] border border-gray-700 rounded-2xl p-5 w-full max-w-sm text-center">
+            <h3 class="font-bold text-lg mb-2 text-amber-400">Nạp tiền tự động</h3>
+            <p class="text-xs text-gray-300 mb-3">Quét mã QR bên dưới bằng ứng dụng Ngân hàng. Hệ thống tự động cộng tiền sau 5-10 giây.</p>
+            <img id="vietqr-img" src="" alt="VietQR" class="w-56 h-56 mx-auto rounded-lg mb-3 bg-white p-2">
+            <div class="bg-gray-900 p-2.5 rounded-lg text-left text-xs mb-4">
+                <p class="text-gray-400">Nội dung chuyển khoản (Bắt buộc):</p>
+                <p id="transfer-memo" class="font-mono font-bold text-amber-400 text-sm mt-0.5">NAP 000000</p>
+            </div>
+            <button onclick="closeDepositModal()" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2.5 rounded-xl text-sm">
+                Đóng
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Mở rộng toàn màn hình
+
+        let currentUserId = null;
+
+        // 1. Khởi tạo và xác thực người dùng với Backend
+        async function initApp() {
+            const user = tg.initDataUnsafe?.user || {
+                id: 5637124894,
+                first_name: "Duc",
+                last_name: "Tri",
+                username: "riu_0105",
+                photo_url: "https://ui-avatars.com/api/?name=D&background=0D8ABC&color=fff"
+            }; // Dữ liệu mẫu nếu mở ngoài trình duyệt để test
+
+            currentUserId = user.id;
+
+            // Hiển thị lên giao diện
+            document.getElementById('user-name').innerText = `${user.first_name \vert{}\vert{} ''}${user.last_name || ''}`.trim();
+            document.getElementById('user-info').innerText = `@${user.username \vert{}\vert{} 'user'} • ID ${user.id}`;
+            if (user.photo_url) {
+                document.getElementById('user-avatar').src = user.photo_url;
+            }
+
+            // Gửi initData về Backend để xác thực và lấy số dư + sản phẩm
+            try {
+                const res = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ initData: tg.initData, fallbackUser: user })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    updateBalanceUI(data.user.balance);
+                    renderProducts(data.products);
+                }
+            } catch (err) {
+                console.error("Lỗi kết nối server:", err);
+            }
+        }
+
+        function updateBalanceUI(balance) {
+            document.getElementById('user-balance').innerText = balance.toLocaleString('vi-VN') + 'đ';
+        }
+
+        // 2. Render danh sách sản phẩm
+        function renderProducts(products) {
+            const container = document.getElementById('product-list');
+            container.innerHTML = products.map(p => `
+                <div class="product-card rounded-2xl p-3 flex flex-col justify-between">
+                    <div>
+                        <div class="relative mb-2">
+                            <img src="${p.image}" class="w-full h-28 object-cover rounded-xl">
+                            <span class="absolute top-1.5 right-1.5 bg-emerald-900/90 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                Còn ${p.stock}
+                            </span>
+                        </div>
+                        <h4 class="font-bold text-sm text-white line-clamp-1">${p.name}</h4>
+                        <p class="text-[11px] text-gray-400 mb-3">Khác</p>
+                    </div>
+                    <div class="flex justify-between items-center pt-2 border-t border-gray-800">
+                        <div>
+                            <p class="text-blue-400 font-extrabold text-sm">${p.price.toLocaleString('vi-VN')}đ</p>
+                            <p class="text-[10px] text-emerald-400">≈ ${(p.price / 26000).toFixed(2)} USDT</p>
+                        </div>
+                        <button onclick="buyProduct(${p.id})" class="bg-blue-600 hover:bg-blue-500 w-8 h-8 rounded-full flex items-center justify-center text-white text-xs">
+                            ▶
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 3. Mua sản phẩm
+        async function buyProduct(productId) {
+            const res = await fetch('/api/buy', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ initData: tg.initData, userId: currentUserId, productId })
+            });
+            const data = await res.json();
+            if (data.success) {
+                tg.showAlert(`🎉 Mua thành công!\nThông tin tài khoản: ${data.accountData}`);
+                updateBalanceUI(data.newBalance);
+                initApp(); // Tải lại tồn kho
+            } else {
+                tg.showAlert(`❌ Lỗi: ${data.message}`);
+            }
+        }
+
+        // 4. Mở Modal Nạp Tiền VietQR
+        function openDepositModal() {
+            const BANK_ID = "MB"; // Mã ngân hàng (VD: MB, VCB, TCB, ACB...)
+            const ACCOUNT_NO = "0123456789"; // Số tài khoản của bạn
+            const memo = `NAP ${currentUserId}`;
+            
+            // Tạo link VietQR tự động điền sẵn nội dung chuyển khoản
+            const qrUrl = `https://img.vietqr.io/image/${BANK_ID}-${ACCOUNT_NO}-compact2.png?addInfo=${encodeURIComponent(memo)}`;
+            
+            document.getElementById('vietqr-img').src = qrUrl;
+            document.getElementById('transfer-memo').innerText = memo;
+            document.getElementById('deposit-modal').classList.remove('hidden');
+            document.getElementById('deposit-modal').classList.add('flex');
+        }
+
+        function closeDepositModal() {
+            document.getElementById('deposit-modal').classList.add('hidden');
+            document.getElementById('deposit-modal').classList.remove('flex');
+            initApp(); // Cập nhật lại số dư khi đóng modal
+        }
+
+        initApp();
+    </script>
+</body>
 </html>
