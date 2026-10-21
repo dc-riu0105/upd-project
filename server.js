@@ -8,7 +8,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ================= CẤU HÌNH HỆ THỐNG =================
-const BOT_TOKEN = 'THAY_BOT_TOKEN_CUA_BAN_VAO_DAY'; 
+const BOT_TOKEN = '8816206576:AAGvGgLkjNFieZ4kWwyt9nxtE6X_I2uftzs'; 
 const WEBHOOK_SECRET_KEY = 'MAT_KHAU_BAO_MAT_WEBHOOK_NGAN_HANG'; // Dùng để bảo mật API nạp tiền
 
 // ================= KHỞI TẠO DATABASE (SQLite) =================
